@@ -29,8 +29,21 @@
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html, body { height: 100%; }
+	<script>
+		if ('serviceWorker' in navigator) {
+		    window.addEventListener('load', function() {
+		        navigator.serviceWorker.register('./sw.js')
+		            .then(function() {
+		                console.log('Service Worker registrado com sucesso.');
+		            })
+		            .catch(function(error) {
+		                console.error('Erro ao registrar Service Worker:', error);
+		            });
+		    });
+		}
+	</script>
 
+  html, body { height: 100%; }
   body {
     background-color: var(--bg);
     color: var(--ink);
