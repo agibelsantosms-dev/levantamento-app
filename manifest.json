@@ -1,0 +1,22 @@
+{
+  "name": "Levantamento - Agibel Santos",
+  "short_name": "Levantamento",
+  "description": "Controle de pagamentos de serviços de topografia",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#17171A",
+  "theme_color": "#F2891D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
