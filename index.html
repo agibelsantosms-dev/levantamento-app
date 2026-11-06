@@ -1033,14 +1033,14 @@ document.getElementById('saveService').onclick = async () => {
     const diaAtual = new Date().toLocaleDateString('pt-BR');
 
     mensagemWhatsapp =
-      `*${descricao || 'Serviço contratado'}*\n` +
-      `*${cliente}*\n` +
-      `*Valor Contratado ${fmt(valor)}*\n` +
+      `> *${cliente}*\n` +
+	  `> *${descricao || 'Serviço contratado'}*\n` +
+      `- Valor Contratado: *${fmt(valor)}*\n` +
       (valorEntrada > 0
-        ? `*Valor de Entrada ${fmt(valorEntrada)} pago em ${diaAtual}*\n`
+        ? `- Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
         : '') +
-      `*Valor Restante ${fmt(restante)}*\n\n` +
-      `Agibel Santos - Geomensor`;
+      `- Valor Restante: *${fmt(restante)}*\n\n` +
+      `*Agibel Santos*\nTécnico Geomensor`;
 
     // Abre a janela antes do salvamento para evitar bloqueio de pop-up
     janelaWhatsapp = window.open('about:blank', '_blank');
