@@ -582,9 +582,24 @@
       <h2 id="serviceModalTitle">Novo serviço</h2>
       <div class="sub" id="serviceModalSub">Registre o cliente e o valor combinado</div>
       <div class="field">
+              <div class="field">
         <label>Cliente</label>
         <input type="text" id="inpCliente" placeholder="Nome do cliente">
       </div>
+
+      <div class="field">
+        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+          <input type="checkbox" id="inpEnviarWhatsapp" style="width:auto; margin:0;">
+          Enviar resumo do serviço pelo WhatsApp
+        </label>
+      </div>
+
+      <div class="field">
+        <label>WhatsApp</label>
+        <input type="tel" id="inpWhatsapp" placeholder="(75) 99999-9999"
+               inputmode="tel" autocomplete="tel">
+      </div>
+
       <div class="field">
         <label>Descrição do serviço</label>
         <input type="text" id="inpDescricao" placeholder="Ex: levantamento planialtimétrico">
@@ -888,6 +903,8 @@ function openNewServiceModal() {
   document.getElementById('serviceModalSub').textContent = 'Registre o cliente e o valor combinado';
   document.getElementById('fieldEntrada').style.display = 'block';
   document.getElementById('inpCliente').value = '';
+	document.getElementById('inpEnviarWhatsapp').checked = false;
+  document.getElementById('inpWhatsapp').value = '';
   document.getElementById('inpDescricao').value = '';
   document.getElementById('inpValor').value = '';
   document.getElementById('inpEntrada').value = '';
@@ -905,6 +922,8 @@ function openEditServiceModal(id) {
   document.getElementById('serviceModalSub').textContent = 'A entrada não é editável aqui — use "+ Pagamento" para lançar novos valores';
   document.getElementById('fieldEntrada').style.display = 'none';
   document.getElementById('inpCliente').value = s.cliente;
+	document.getElementById('inpEnviarWhatsapp').checked = !!s.enviarWhatsapp;
+  document.getElementById('inpWhatsapp').value = s.whatsapp || '';
   document.getElementById('inpDescricao').value = s.descricao || '';
   document.getElementById('inpValor').value = s.valor;
   document.getElementById('inpServicoObs').value = s.observacao || '';
@@ -926,12 +945,35 @@ document.getElementById('inpServicoObs').addEventListener('input', (e) => {
   document.getElementById('servicoObsCount').textContent = e.target.value.length;
 });
 
+function normalizarTelefoneWhatsApp(numero) {
+  let digitos = String(numero || '').replace(/\D/g, '');
+
+  // Acrescenta o código do Brasil quando necessário
+  if (digitos.length === 10 || digitos.length === 11) {
+    digitos = '55' + digitos;
+  }
+
+  return digitos;
+}
+	
 document.getElementById('saveService').onclick = async () => {
   const cliente = document.getElementById('inpCliente').value.trim();
   const descricao = document.getElementById('inpDescricao').value.trim();
   const valor = parseFloat(document.getElementById('inpValor').value);
   const observacao = document.getElementById('inpServicoObs').value.trim();
   const croquiId = document.getElementById('inpServicoCroqui').value;
+
+	const enviarWhatsapp = document.getElementById('inpEnviarWhatsapp').checked;
+  let whatsapp = document.getElementById('inpWhatsapp').value.trim();
+
+  if (enviarWhatsapp) {
+    whatsapp = normalizarTelefoneWhatsApp(whatsapp);
+
+    if (whatsapp.length !== 12 && whatsapp.length !== 13) {
+      showToast('Informe um número de WhatsApp válido com DDD.');
+      return;
+    }
+  }
 
   if (!cliente) { showToast('Informe o nome do cliente.'); return; }
   if (!valor || valor <= 0) { showToast('Informe um valor total válido.'); return; }
@@ -945,6 +987,8 @@ document.getElementById('saveService').onclick = async () => {
     s.descricao = descricao;
     s.valor = valor;
     s.observacao = observacao;
+	  s.enviarWhatsapp = enviarWhatsapp;
+    s.whatsapp = whatsapp;
     s.croquiId = croquiId || null;
     if (oldCroquiId && oldCroquiId !== s.croquiId) {
       const oldCroqui = croquis.find(c => c.id === oldCroquiId);
@@ -960,20 +1004,58 @@ document.getElementById('saveService').onclick = async () => {
   }
 
   const entrada = parseFloat(document.getElementById('inpEntrada').value);
-  const novo = {
+    const novo = {
     id: genId(),
-    cliente, descricao, valor, observacao, croquiId: croquiId || null,
+    cliente, descricao, valor, observacao,
+    enviarWhatsapp, whatsapp,
+    croquiId: croquiId || null,
     data: new Date().toISOString().slice(0,10),
     pagamentos: []
   };
   if (entrada && entrada > 0) {
     novo.pagamentos.push({ id: genId(), valor: entrada, data: new Date().toISOString().slice(0,10), obs: 'Entrada' });
   }
+
+  let janelaWhatsapp = null;
+  let mensagemWhatsapp = '';
+
+  if (enviarWhatsapp) {
+    const valorEntrada = (entrada && entrada > 0) ? entrada : 0;
+    const restante = Math.max(0, valor - valorEntrada);
+    const diaAtual = new Date().toLocaleDateString('pt-BR');
+
+    mensagemWhatsapp =
+      `*${descricao || 'Serviço contratado'}*\n` +
+      `*${cliente}*\n` +
+      `*Valor Contratado ${fmt(valor)}*\n` +
+      `*Valor de Entrada ${fmt(valorEntrada)} pago em ${diaAtual}*\n` +
+      `*Valor Restante ${fmt(restante)}*\n\n` +
+      `Agibel Santos - Geomensor`;
+
+    // Abre a janela antes do salvamento para evitar bloqueio de pop-up
+    janelaWhatsapp = window.open('about:blank', '_blank');
+  }
+
   servicos.push(novo);
   await saveData();
+
   overlayService.classList.remove('open');
   render();
-  showToast('Serviço cadastrado.');
+
+  if (enviarWhatsapp) {
+    if (janelaWhatsapp) {
+      janelaWhatsapp.location.href =
+        'https://wa.me/' + whatsapp +
+        '?text=' + encodeURIComponent(mensagemWhatsapp);
+
+      showToast('Serviço cadastrado. WhatsApp aberto.');
+    } else {
+      showToast('Serviço cadastrado, mas o navegador bloqueou a abertura do WhatsApp. Permita pop-ups.');
+    }
+  } else {
+    showToast('Serviço cadastrado.');
+  }
+	
 };
 
 // --- Novo pagamento ---
