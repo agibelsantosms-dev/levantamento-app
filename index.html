@@ -882,6 +882,15 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   };
 });
 
+	// Define a visibilidade inicial dos botões flutuantes
+const abaInicial = document.querySelector('.tab-btn.active')?.dataset.tab;
+
+document.getElementById('fabNewService').style.display =
+  abaInicial === 'servicos' ? 'flex' : 'none';
+
+document.getElementById('fabNewCroqui').style.display =
+  abaInicial === 'croqui' ? 'flex' : 'none';
+
 // --- Novo / editar serviço ---
 const overlayService = document.getElementById('overlayService');
 let editingServiceId = null;
