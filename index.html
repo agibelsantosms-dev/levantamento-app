@@ -582,7 +582,6 @@
       <h2 id="serviceModalTitle">Novo serviço</h2>
       <div class="sub" id="serviceModalSub">Registre o cliente e o valor combinado</div>
       <div class="field">
-              <div class="field">
         <label>Cliente</label>
         <input type="text" id="inpCliente" placeholder="Nome do cliente">
       </div>
@@ -885,7 +884,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 	// Define a visibilidade inicial dos botões flutuantes
 const abaInicial = document.querySelector('.tab-btn.active')?.dataset.tab;
 
-document.getElementById('fabNewService').style.display = 'flex';
+document.getElementById('fabNewService').style.display =
+  abaInicial === 'servicos' ? 'flex' : 'none';
 
 document.getElementById('fabNewCroqui').style.display =
   abaInicial === 'croqui' ? 'flex' : 'none';
