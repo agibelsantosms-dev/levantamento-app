@@ -1033,9 +1033,9 @@ document.getElementById('saveService').onclick = async () => {
     const diaAtual = new Date().toLocaleDateString('pt-BR');
 
     mensagemWhatsapp =
-	  ````Cliente: ```\n\n` +
+	  `Cliente:\n\n` +
       `> *${cliente}*\n` +
-		````Serviço: ```\n\n` +
+		`Serviço: \n\n` +
 	  `> *${descricao || 'Serviço contratado'}*\n` +
       `- Valor Contratado: *${fmt(valor)}*\n` +
       (valorEntrada > 0
