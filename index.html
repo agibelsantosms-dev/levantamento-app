@@ -1020,7 +1020,7 @@ document.getElementById('saveService').onclick = async () => {
   let mensagemWhatsapp = '';
 
   if (enviarWhatsapp) {
-    const valorEntrada = (entrada && entrada > 0) ? entrada : 0;
+        const valorEntrada = (entrada && entrada > 0) ? entrada : 0;
     const restante = Math.max(0, valor - valorEntrada);
     const diaAtual = new Date().toLocaleDateString('pt-BR');
 
@@ -1028,7 +1028,9 @@ document.getElementById('saveService').onclick = async () => {
       `*${descricao || 'Serviço contratado'}*\n` +
       `*${cliente}*\n` +
       `*Valor Contratado ${fmt(valor)}*\n` +
-      `*Valor de Entrada ${fmt(valorEntrada)} pago em ${diaAtual}*\n` +
+      (valorEntrada > 0
+        ? `*Valor de Entrada ${fmt(valorEntrada)} pago em ${diaAtual}*\n`
+        : '') +
       `*Valor Restante ${fmt(restante)}*\n\n` +
       `Agibel Santos - Geomensor`;
 
