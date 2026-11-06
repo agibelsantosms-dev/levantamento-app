@@ -1034,14 +1034,14 @@ document.getElementById('saveService').onclick = async () => {
 
     mensagemWhatsapp =
 	  `Cliente:\n\n` +
-      `> *${cliente}*\n` +
+      `*${cliente}*\n` +
 		`Serviço: \n\n` +
-	  `> *${descricao || 'Serviço contratado'}*\n` +
-      `- Valor Contratado: *${fmt(valor)}*\n` +
+	  `*${descricao || 'Serviço contratado'}*\n` +
+      `Valor Contratado: *${fmt(valor)}*\n` +
       (valorEntrada > 0
-        ? `- Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
+        ? `Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
         : '') +
-      `- Valor Restante: *${fmt(restante)}*\n\n` +
+      `Valor Restante: *${fmt(restante)}*\n\n` +
       `*Agibel Santos*\nTécnico Geomensor`;
 
     // Abre a janela antes do salvamento para evitar bloqueio de pop-up
