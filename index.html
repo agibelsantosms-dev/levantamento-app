@@ -1044,7 +1044,7 @@ document.getElementById('saveService').onclick = async () => {
         ? `• Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
         : '') +
       `• Valor Restante: *${fmt(restante)}*\n\n` +
-      `Técnico Geomensor`;
+      `Técnico Geomensor\n`+
 	  `> *Agibel Santos*`;
 
     // Abre a janela antes do salvamento para evitar bloqueio de pop-up
@@ -1095,20 +1095,106 @@ document.getElementById('savePayment').onclick = async () => {
   const valor = parseFloat(document.getElementById('inpPagValor').value);
   const data = document.getElementById('inpPagData').value;
   const obs = document.getElementById('inpPagObs').value.trim();
-  if (!valor || valor <= 0) { showToast('Informe um valor válido.'); return; }
+
+  if (!valor || valor <= 0) {
+    showToast('Informe um valor válido.');
+    return;
+  }
 
   const s = servicos.find(x => x.id === activeServiceId);
   const saldo = Number(s.valor) - totalPago(s);
+
   if (valor > saldo + 0.004) {
     showToast('Esse valor é maior que o saldo em aberto (' + fmt(saldo) + ').');
     return;
   }
 
+  // Abre a janela antes do salvamento para evitar bloqueio de pop-up
+  let janelaWhatsapp = null;
+
+  if (s.enviarWhatsapp && s.whatsapp) {
+    janelaWhatsapp = window.open('about:blank', '_blank');
+  }
+
+  // Registra o novo pagamento
   s.pagamentos.push({ id: genId(), valor, data, obs });
+
   await saveData();
+
   overlayPayment.classList.remove('open');
   render();
-  showToast('Pagamento registrado.');
+
+  // Monta e abre a mensagem do WhatsApp
+  if (s.enviarWhatsapp && s.whatsapp) {
+
+    const pagamentos = s.pagamentos || [];
+
+    // Identifica a entrada original
+    const pagamentoEntrada = pagamentos.find(p =>
+      String(p.obs || '').trim().toLowerCase() === 'entrada'
+    );
+
+    // Identifica todos os pagamentos posteriores à entrada
+    const pagamentosPosteriores = pagamentos.filter(p =>
+      p !== pagamentoEntrada
+    );
+
+    // Formata as datas sem problemas de fuso horário
+    const formatarData = (dataPagamento) => {
+      if (!dataPagamento) return '';
+
+      const partes = String(dataPagamento).slice(0, 10).split('-');
+
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+
+      return dataPagamento;
+    };
+
+    // Monta o histórico dos pagamentos
+    let historico = '';
+
+    if (pagamentoEntrada) {
+      historico +=
+        `Valor de Entrada: *R$ ${fmt(Number(pagamentoEntrada.valor))}*, ` +
+        `pago em *${formatarData(pagamentoEntrada.data)}*\n`;
+    }
+
+    pagamentosPosteriores.forEach(p => {
+      historico +=
+        `Valor Abatido: *R$ ${fmt(Number(p.valor))}*, ` +
+        `pago em *${formatarData(p.data)}*\n`;
+    });
+
+    // Calcula o saldo atualizado
+    const restante = Math.max(0, Number(s.valor) - totalPago(s));
+
+    const mensagemWhatsapp =
+      `Cliente:\n` +
+      `> *${s.cliente}*\n\n` +
+		
+      `Serviço:\n` +
+      `>*${s.descricao || 'Serviço contratado'}*\n\n` +
+      `Valor Contratado: *R$ ${fmt(Number(s.valor))}*\n` +
+      historico +
+      `Valor Restante: *R$ ${fmt(restante)}*\n\n` +
+      `Técnico Geomensor\n` +
+	  `> *Agibel Santos*`;
+
+    if (janelaWhatsapp) {
+      janelaWhatsapp.location.href =
+        'https://wa.me/' + s.whatsapp +
+        '?text=' + encodeURIComponent(mensagemWhatsapp);
+
+      showToast('Pagamento registrado. WhatsApp aberto.');
+    } else {
+      showToast('Pagamento registrado, mas o navegador bloqueou o WhatsApp.');
+    }
+
+  } else {
+    showToast('Pagamento registrado.');
+  }
 };
 
 
