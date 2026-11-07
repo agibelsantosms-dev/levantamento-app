@@ -1175,10 +1175,10 @@ document.getElementById('savePayment').onclick = async () => {
       `> *${s.cliente}*\n\n` +
 		
       `Serviço:\n` +
-      `>*${s.descricao || 'Serviço contratado'}*\n\n` +
-      `Valor Contratado: *R$ ${fmt(Number(s.valor))}*\n` +
+      `> *${s.descricao || 'Serviço contratado'}*\n\n` +
+      `• Valor Contratado: *${fmt(Number(s.valor))}*\n` +
       historico +
-      `Valor Restante: *R$ ${fmt(restante)}*\n\n` +
+      `• Valor Restante: *${fmt(restante)}*\n\n` +
       `Técnico Geomensor\n` +
 	  `> *Agibel Santos*`;
 
