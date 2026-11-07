@@ -1041,7 +1041,7 @@ document.getElementById('saveService').onclick = async () => {
 		
       `• Valor Contratado: *${fmt(valor)}*\n` +
       (valorEntrada > 0
-        ? `• Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
+        ? `1. Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
         : '') +
       `• Valor Restante: *${fmt(restante)}*\n\n` +
       `Técnico Geomensor\n`+
@@ -1154,31 +1154,39 @@ document.getElementById('savePayment').onclick = async () => {
 
     // Monta o histórico dos pagamentos
     let historico = '';
+	let numeroPagamento = 1;
 
     if (pagamentoEntrada) {
       historico +=
-        `Valor de Entrada: *R$ ${fmt(Number(pagamentoEntrada.valor))}*, ` +
+        `1. Valor de Entrada: *${fmt(Number(pagamentoEntrada.valor))}*, ` +
         `pago em *${formatarData(pagamentoEntrada.data)}*\n`;
+		numeroPagamento = 2;
     }
 
     pagamentosPosteriores.forEach(p => {
       historico +=
-        `Valor Abatido: *R$ ${fmt(Number(p.valor))}*, ` +
+        `${numeroPagamento}. Valor Abatido: *${fmt(Number(p.valor))}*, ` +
         `pago em *${formatarData(p.data)}*\n`;
+		numeroPagamento++;
     });
 
     // Calcula o saldo atualizado
     const restante = Math.max(0, Number(s.valor) - totalPago(s));
-
+	const quitado = restante <= 0.004;
     const mensagemWhatsapp =
       `Cliente:\n` +
       `> *${s.cliente}*\n\n` +
 		
       `Serviço:\n` +
       `> *${s.descricao || 'Serviço contratado'}*\n\n` +
-      `• Valor Contratado: *${fmt(Number(s.valor))}*\n` +
+		
+      `•• Valor Contratado: *${fmt(Number(s.valor))}*\n` +
       historico +
-      `• Valor Restante: *${fmt(restante)}*\n\n` +
+      (quitado
+    ? `*-- SERVIÇO QUITADO --\n\n` +
+      `Agradeço pela confiança e preferência.\n` +
+      `Foi um prazer realizar sua demanda e fico à disposição!\n\n`
+    : `•• Valor Restante: *${fmt(restante)}*\n\n`) +
       `Técnico Geomensor\n` +
 	  `> *Agibel Santos*`;
 
