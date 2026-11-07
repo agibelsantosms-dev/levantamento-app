@@ -1045,8 +1045,8 @@ document.getElementById('saveService').onclick = async () => {
         ? `1. Valor de Entrada: *${fmt(valorEntrada)}*, pago em *${diaAtual}*\n`
         : '') +
 		(quitado
-	    ? `*SERVIÇO QUITADO*\n\n` +
-	      `Agradeço pela confiança e preferência!\n`
+	    ? `*SERVIÇO QUITADO*\n` +
+	      `Agradeço pela confiança e preferência.\n\n`
 	    : `• Valor Restante: *${fmt(restante)}*\n\n` +
       `Técnico Geomensor\n`+
 	  `> *Agibel Santos*`;
@@ -1187,9 +1187,9 @@ document.getElementById('savePayment').onclick = async () => {
       `• Valor Contratado: *${fmt(Number(s.valor))}*\n` +
       historico +
       (quitado
-    ? `*SERVIÇO QUITADO*\n\n` +
-      `Agradeço pela confiança e preferência!\n`
-    : `• Valor Restante: *${fmt(restante)}*\n\n`) +
+	    ? `*SERVIÇO QUITADO*\n` +
+	      `Agradeço pela confiança e preferência.\n\n`
+	    : `• Valor Restante: *${fmt(restante)}*\n\n`) +
       `Técnico Geomensor\n` +
 	  `> *Agibel Santos*`;
 
