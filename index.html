@@ -659,6 +659,12 @@
         <textarea id="inpPagObs" maxlength="2000" placeholder="Detalhes desse pagamento, forma de pagamento, condições combinadas etc."></textarea>
         <div class="charcount"><span id="obsCount">0</span>/2000</div>
       </div>
+		<div class="field" id="pagWhatsappField" style="display:none;">
+		  <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+		    <input type="checkbox" id="pagEnviarWhatsapp" checked>
+		    Enviar mensagem pelo WhatsApp?
+		  </label>
+		</div>
       <div class="modal-actions">
         <button class="btn secondary" id="cancelPayment">Cancelar</button>
         <button class="btn" id="savePayment">Registrar</button>
@@ -1082,11 +1088,22 @@ const overlayPayment = document.getElementById('overlayPayment');
 function openPaymentModal(id) {
   activeServiceId = id;
   const s = servicos.find(x => x.id === id);
-  document.getElementById('paymentSub').textContent = s.cliente + ' — saldo atual ' + fmt(Number(s.valor) - totalPago(s));
+
+  document.getElementById('paymentSub').textContent =
+    s.cliente + ' — saldo atual ' + fmt(Number(s.valor) - totalPago(s));
+
   document.getElementById('inpPagValor').value = '';
   document.getElementById('inpPagData').value = new Date().toISOString().slice(0,10);
   document.getElementById('inpPagObs').value = '';
   document.getElementById('obsCount').textContent = '0';
+
+  // Exibe a opção somente se houver WhatsApp cadastrado
+  const campoWhatsapp = document.getElementById('pagWhatsappField');
+  const checkWhatsapp = document.getElementById('pagEnviarWhatsapp');
+
+  campoWhatsapp.style.display = s.whatsapp ? 'block' : 'none';
+  checkWhatsapp.checked = Boolean(s.whatsapp);
+
   overlayPayment.classList.add('open');
 }
 document.getElementById('cancelPayment').onclick = () => overlayPayment.classList.remove('open');
@@ -1107,6 +1124,10 @@ document.getElementById('savePayment').onclick = async () => {
 
   const s = servicos.find(x => x.id === activeServiceId);
   const saldo = Number(s.valor) - totalPago(s);
+	
+	const enviarMensagem =
+	Boolean(s.whatsapp) &&
+	document.getElementById('pagEnviarWhatsapp').checked;
 
   if (valor > saldo + 0.004) {
     showToast('Esse valor é maior que o saldo em aberto (' + fmt(saldo) + ').');
@@ -1116,9 +1137,9 @@ document.getElementById('savePayment').onclick = async () => {
   // Abre a janela antes do salvamento para evitar bloqueio de pop-up
   let janelaWhatsapp = null;
 
-  if (s.enviarWhatsapp && s.whatsapp) {
-    janelaWhatsapp = window.open('about:blank', '_blank');
-  }
+  if (enviarMensagem) {
+  janelaWhatsapp = window.open('about:blank', '_blank');
+}
 
   // Registra o novo pagamento
   s.pagamentos.push({ id: genId(), valor, data, obs });
@@ -1129,7 +1150,7 @@ document.getElementById('savePayment').onclick = async () => {
   render();
 
   // Monta e abre a mensagem do WhatsApp
-  if (s.enviarWhatsapp && s.whatsapp) {
+  if (enviarMensagem) {
 
     const pagamentos = s.pagamentos || [];
 
